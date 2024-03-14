@@ -89,6 +89,7 @@ class PreloadScene extends Phaser.Scene {
       "mint_button",
       "choose_NFT_frame",
       "choose_skin_text",
+      "sepolia_testnet_image",
     ];
 
     this.images.forEach((img) => {
@@ -101,7 +102,7 @@ class PreloadScene extends Phaser.Scene {
       this.load.image(`floor${i}`, `floor${i}.png`);
     }
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 4; i++) {
       this.load.spritesheet(`player_${i}`, `player_${i}.png`, {
         frameWidth: 855 / 9,
         frameHeight: 95,
@@ -110,7 +111,7 @@ class PreloadScene extends Phaser.Scene {
   }
 
   addAnims() {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 4; i++) {
       this.anims.create({
         key: `moveRight_${i}`,
         frames: this.anims.generateFrameNumbers(`player_${i}`, {

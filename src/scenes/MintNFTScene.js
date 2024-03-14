@@ -17,13 +17,12 @@ class MintNFTScene extends Phaser.Scene {
     this.mintNFTTextImage = this.createMintNFTTextImage();
     this.nextStepButton = this.createNextButton();
     this.createNFTImages();
+    this.loadingAnimation = new LoadingAnimation(
+      this,
+      this.halfW,
+      this.halfH + 300
+    );
   }
-
-  //   "NFT_1",
-  //   "NFT_2",
-  //   "NFT_3",
-  //   "mint_nft_text",
-  //   "mint_button",
 
   createMintNFTTextImage() {
     const image = this.add
@@ -34,7 +33,7 @@ class MintNFTScene extends Phaser.Scene {
       targets: image,
       ease: "Back.out",
       duration: 1000,
-      y: this.halfH - 400,
+      y: this.halfH - 350,
     });
 
     return image;
@@ -46,34 +45,69 @@ class MintNFTScene extends Phaser.Scene {
       230 * i + this.halfW - 230,
       this.halfH + 80,
       "mint_button"
-    )
-      .setScale(0)
-      .onClick(async () => {
-        this.game.audio.click.play();
-        console.log(i);
-        const NFT_ID = i;
-        const userWalletAddress = web3Manager.getUserWalletAddress();
-
-        // const tokenMetadata = await Web3Manager.contract.methods
-        //   .getTokenURIForSale(i)
-        //   .call();
-
-        // await Web3Manager.contract.methods.purchaseToken(id).send({
-        //     from: userAddress,
-        //     value: tokenPriceInWei,
-        //   });
-
-        //! WYŚLIJ REQUEST NA BLOCKCHAIN
-      });
+    ).setScale(0);
 
     this.tweens.add({
       targets: button,
       ease: "Back.out",
       duration: 900,
       scale: 1,
+      onComplete: () => {
+        button.onClick(async () => {
+          if (
+            this.loadingAnimation.loadingTween &&
+            this.loadingAnimation.loadingTween.isPlaying()
+          )
+            return;
+
+          button.setVisible(false);
+          this.game.audio.click.play();
+          this.loadingAnimation.start(button.x, button.y + 10);
+          this.handleRequestToBlockchain(i);
+        });
+      },
     });
 
     return button;
+  }
+
+  async handleRequestToBlockchain(i) {
+    const NFT_ID = i;
+    const userWalletAddress = web3Manager.getUserWalletAddress();
+    await web3Manager.contract.methods
+      .userMintToken(NFT_ID)
+      .send({
+        from: userWalletAddress,
+      })
+      .then((receipt) => {
+        console.log(receipt);
+        if (receipt.status === true) {
+          new RequestStateInformation(
+            this,
+            this.loadingAnimation.x,
+            this.loadingAnimation.y,
+            "correct_icon"
+          );
+        } else {
+          new RequestStateInformation(
+            this,
+            this.loadingAnimation.x,
+            this.loadingAnimation.y,
+            "false_icon"
+          );
+        }
+      })
+      .catch((error) => {
+        new RequestStateInformation(
+          this,
+          this.loadingAnimation.x,
+          this.loadingAnimation.y,
+          "false_icon"
+        );
+        this.loadingAnimation.stop();
+      });
+
+    this.loadingAnimation.stop();
   }
 
   createNFTImage(i) {
@@ -107,6 +141,11 @@ class MintNFTScene extends Phaser.Scene {
   createNextButton() {
     const button = new Button(this, this.halfW, gameHeight, "backButton")
       .onClick(() => {
+        if (
+          this.loadingAnimation.loadingTween &&
+          this.loadingAnimation.loadingTween.isPlaying()
+        )
+          return;
         this.game.audio.click.play();
         this.handleNextScene();
       })

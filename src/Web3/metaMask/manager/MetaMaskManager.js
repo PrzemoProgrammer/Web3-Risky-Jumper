@@ -36,14 +36,14 @@ class MetaMaskManager {
     return window.ethereum && window.ethereum.isMetaMask;
   }
 
-  async isConnectedToPolygonNetwork() {
+  async isConnectedToSepoliaNetwork() {
     try {
-      const polygonChainId = "0x89";
+      const sepoliaChainId = "0xaa36a7"; //"0x89";
       const currentChainId = await window.ethereum.request({
         method: "eth_chainId",
       });
 
-      return currentChainId === polygonChainId;
+      return currentChainId === sepoliaChainId;
     } catch (error) {
       console.error(
         "Error while checking connection to Polygon network:",
@@ -53,44 +53,44 @@ class MetaMaskManager {
     }
   }
 
-  async switchNetworkToPolygon() {
+  async switchNetworkToSepolia() {
     try {
       await window.ethereum.request({
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0x89", // Polygon Mainnet ID is 137 (in hexadecimal)
-            chainName: "Polygon Mainnet",
-            rpcUrls: ["https://polygon-rpc.com/"], // Replace with the Polygon RPC URL
+            chainId: "0xaa36a7",
+            chainName: "Sepolia Testnet",
+            rpcUrls: ["https://eth-sepolia.public.blastapi.io"],
             nativeCurrency: {
-              name: "MATIC",
-              symbol: "MATIC",
+              name: "ETH",
+              symbol: "ETH",
               decimals: 18,
             },
-            blockExplorerUrls: ["https://polygonscan.com/"], // Replace with the Polygon explorer URL
+            blockExplorerUrls: ["https://sepolia.etherscan.io/"],
           },
         ],
       });
-      console.log("Switched to the Polygon network.");
+      console.log("Zmieniono na sieć testową Sepolia.");
     } catch (error) {
-      console.error("Error while switching to Polygon network:", error);
+      console.error("Błąd podczas zmiany na sieć testową Sepolia:", error);
       return false;
     }
   }
 
-  async connectToPolygonNetworkIfNeeded() {
+  async connectToSepoliaNetworkIfNeeded() {
     let state = null;
     try {
-      const isPolygonConnected = await this.isConnectedToPolygonNetwork();
+      const isSepoliaConnected = await this.isConnectedToSepoliaNetwork();
 
-      if (!isPolygonConnected) {
-        const connectState = await this.switchNetworkToPolygon();
+      if (!isSepoliaConnected) {
+        const connectState = await this.switchNetworkToSepolia();
         state = connectState;
       }
     } catch (error) {
       state = false;
       console.error(
-        "Error while checking or switching to Polygon network:",
+        "Error while checking or switching to Sepolia network:",
         error
       );
     }

@@ -104,7 +104,7 @@ class ConnectBlockchainScene extends Phaser.Scene {
         console.log("Metamask installed");
         this.createMetaMaskConnectText();
         const switchNetworkState =
-          await metaMaskManager.connectToPolygonNetworkIfNeeded();
+          await metaMaskManager.connectToSepoliaNetworkIfNeeded();
         if (switchNetworkState === false) {
           this.changeStateTextTexture("false_icon");
           return;

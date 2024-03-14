@@ -3,7 +3,7 @@ class SkinSelectorScene extends Phaser.Scene {
     super("SkinSelectorScene");
   }
 
-  create() {
+  async create() {
     this.gw = gameWidth;
     this.gh = gameHeight;
     this.halfW = halfGameWidth;
@@ -15,10 +15,17 @@ class SkinSelectorScene extends Phaser.Scene {
     this.mintNFTTextCreateTween = null;
     this.chooseSkinID = 0;
 
+    this.loadingAnimation = new LoadingAnimation(this, this.halfW, this.halfH);
+    this.loadingAnimation.start();
+
+    const userNFTs = await this.getUserNFTsFromBLockchain();
+    console.log(userNFTs);
+    this.loadingAnimation.stop();
+
     this.chooseSkinFrame = this.createChooseSkinFrame();
     this.mintNFTTextImage = this.createMintNFTTextImage();
     this.nextStepButton = this.createNextButton();
-    this.createNFTImages();
+    this.createNFTImages(userNFTs);
   }
 
   createMintNFTTextImage() {
@@ -34,32 +41,6 @@ class SkinSelectorScene extends Phaser.Scene {
     });
 
     return image;
-  }
-
-  createMintButton(i) {
-    const button = new Button(
-      this,
-      230 * i + this.halfW - 230,
-      this.halfH + 80,
-      "mint_button"
-    )
-      .setScale(0)
-      .onClick(() => {
-        this.game.audio.click.play();
-        console.log(i);
-        const NFT_ID = i;
-        const userWalletAddress = web3Manager.getUserWalletAddress();
-        //! WYŚLIJ REQUEST NA BLOCKCHAIN
-      });
-
-    this.tweens.add({
-      targets: button,
-      ease: "Back.out",
-      duration: 1200,
-      scale: 1,
-    });
-
-    return button;
   }
 
   createNFTImage(x, y, imageKey) {
@@ -79,17 +60,22 @@ class SkinSelectorScene extends Phaser.Scene {
     return image;
   }
 
-  createNFTImages() {
-    const columns = Math.ceil(Math.sqrt(5));
+  createNFTImages(userNFTs) {
+    const _userNFTs = userNFTs.map((element) => parseInt(element) + 1);
+    _userNFTs.push(0);
+    _userNFTs.sort((a, b) => a - b);
+    const userNFTsCount = _userNFTs.length;
+    const columns = Math.ceil(Math.sqrt(userNFTsCount + 2));
 
-    for (let i = 0; i < 4; i++) {
-      let imageKey = "NFT_" + i;
+    for (let i = 0; i < userNFTsCount; i++) {
+      const skinID = _userNFTs[i];
+      let imageKey = "NFT_" + skinID;
       const x = (i % columns) * 230 + this.halfW - 230;
       const y = this.halfH - 100 + Math.floor(i / columns) * 230;
 
       this.time.delayedCall(100 * i, () => {
         const NFTImage = this.createNFTImage(x, y, imageKey);
-        NFTImage.ID = i;
+        NFTImage.ID = skinID;
         NFTImage.on("pointerdown", () => {
           this.chooseSkinID = NFTImage.ID;
           this.chooseSkinFrame.setPosition(x, y);
@@ -100,6 +86,25 @@ class SkinSelectorScene extends Phaser.Scene {
 
       if (i === 0) this.chooseSkinFrame.setPosition(x, y);
     }
+  }
+
+  async getUserNFTsFromBLockchain() {
+    const userWalletAddress = web3Manager.getUserWalletAddress();
+    let respondStatus = null;
+
+    await web3Manager.contract.methods
+      .getUserTokensId(userWalletAddress)
+      .call()
+      .then((tokens) => {
+        // console.log("Tokeny użytkownika:", tokens);
+        respondStatus = tokens;
+      })
+      .catch((error) => {
+        console.error("Błąd:", error);
+        respondStatus = false;
+      });
+
+    return respondStatus;
   }
 
   createChooseSkinFrame() {
