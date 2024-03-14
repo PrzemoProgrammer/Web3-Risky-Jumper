@@ -11,6 +11,6 @@
 - 𝗘𝘅𝗽𝗿𝗲𝘀𝘀.𝗷𝘀,
 - 𝗠𝗼𝗻𝗴𝗼𝗱𝗯 database
 
-Check live: https://przemoprogrammer.github.io/Web-Risky-Jumper/
+Check live: https://przemoprogrammer.github.io/Web3-Risky-Jumper/
 
 <img align="right" alt="coding" src="https://i.ytimg.com/vi/zPRiNFE4dPk/maxresdefault.jpg">
