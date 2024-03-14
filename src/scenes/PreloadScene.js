@@ -4,7 +4,7 @@ class PreloadScene extends Phaser.Scene {
   }
   preload() {
     this.load.on("complete", () => {
-      this.startNextScene();
+      this.handleNextScene();
     });
     this.load.plugin(
       "rexinputtextplugin",
@@ -151,16 +151,6 @@ class PreloadScene extends Phaser.Scene {
         frameRate: 20,
       });
     }
-  }
-
-  startNextScene() {
-    localStorage.getItem("nickname")
-      ? this.handleNextScene()
-      : this.startLoginScene();
-  }
-
-  startLoginScene() {
-    this.scene.launch("LoginScene");
   }
 
   handleNextScene() {

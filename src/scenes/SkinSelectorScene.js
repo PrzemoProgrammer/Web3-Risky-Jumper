@@ -19,7 +19,6 @@ class SkinSelectorScene extends Phaser.Scene {
     this.loadingAnimation.start();
 
     const userNFTs = await this.getUserNFTsFromBLockchain();
-    console.log(userNFTs);
     this.loadingAnimation.stop();
 
     this.chooseSkinFrame = this.createChooseSkinFrame();
@@ -149,14 +148,14 @@ class SkinSelectorScene extends Phaser.Scene {
       duration: 600,
       x: gameWidth + 300,
       onComplete: () => {
+        localStorage.getItem("nickname")
+          ? this.scene.start("MenuScene")
+          : this.scene.start("LoginScene");
         const playScene = this.scene.get("PlayScene");
         playScene.playStartSceneTween();
         playScene.changePlayerSkin(this.chooseSkinID);
         playScene.playPlayerEntryAnimation();
-        this.scene.start("MenuScene");
-        // this.clearTweens();
         this.scene.remove("SkinSelectorScene");
-        //!CHOOSE SKIN SCENE
       },
     });
 
